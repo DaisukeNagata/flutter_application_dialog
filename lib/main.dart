@@ -28,16 +28,26 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   final SlideUpController _slideUpController = SlideUpController();
-  Stream<int> numberStream() async* {
-    int number = 1;
+  var y = 0.0;
+  var bottom = 0.0;
+  final _buttonHeight = 60.0;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPersistentFrameCallback((_) {
+      y = MediaQuery.of(context).size.height;
+      bottom = MediaQuery.of(context).viewInsets.bottom;
+    });
+  }
+
+  Stream<double> numberStream() async* {
     while (true) {
-      await Future.delayed(const Duration(seconds: 1));
-      yield number++;
+      await Future.delayed(const Duration(milliseconds: 1));
+      yield y = bottom + _buttonHeight;
     }
   }
 
-  String _tex = 'drag&drop';
-  final String _dataSet = '背面のデータ';
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -45,67 +55,45 @@ class _MyHomePageState extends State<MyHomePage> {
         title: const Text('Home'),
       ),
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: <Widget>[
-            Draggable(
-              data: _dataSet,
-              feedback: Material(
-                child: Text(_dataSet),
-              ),
-              childWhenDragging: Text(_dataSet),
-              child: Text(_dataSet),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                _slideUpController.show(
-                  context,
-                  Container(
-                      height: MediaQuery.of(context).size.height / 2,
-
-                      // set size
-                      color: Colors.blue,
-
-                      // set color
+        child: TextFormField(
+          decoration: const InputDecoration(
+            border: OutlineInputBorder(),
+            labelText: 'Enter',
+          ),
+          onTap: () {
+            _slideUpController.show(
+              context,
+              StreamBuilder(
+                  stream: numberStream(),
+                  builder: (BuildContext context, AsyncSnapshot snapshot) {
+                    return Material(
                       child: Container(
-                          alignment: Alignment.center,
-                          child: StreamBuilder(
-                            stream: numberStream(),
-                            builder:
-                                (BuildContext context, AsyncSnapshot snapshot) {
-                              return Material(
-                                child: DragTarget(
-                                  onAccept: (data) {
-                                    setState(() {
-                                      _tex = data.toString();
-                                    });
-                                  },
-                                  builder: (BuildContext context,
-                                      List<Object?> candidateData,
-                                      List<dynamic> rejectedData) {
-                                    return Text(
-                                      _tex,
-                                      style: const TextStyle(fontSize: 24),
-                                    );
-                                  },
-                                ),
-                              );
-                            },
-                          ))),
-                  200, // set speed
-                );
-              },
-              child: const Text('Show Overlay'),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                setState(() {
-                  _tex = 'drag&drop';
-                });
-              },
-              child: const Text('Clear Data'),
-            ),
-          ],
+                        color: Colors.black12,
+                        height: y,
+                        child: Stack(
+                          children: [
+                            GestureDetector(
+                              onTap: () {
+                                _slideUpController.show(
+                                    context, const SizedBox(), 200);
+                                FocusScope.of(context).unfocus();
+                              },
+                              child: Container(
+                                alignment: Alignment.centerRight,
+                                color: Colors.grey,
+                                width: MediaQuery.of(context).size.width,
+                                height: _buttonHeight,
+                                child: const Text('Close'),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  }),
+              200, // set speed
+            );
+          },
         ),
       ),
     );
