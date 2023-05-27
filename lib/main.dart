@@ -31,9 +31,9 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   final SlideUpController _slideUpController = SlideUpController();
   StreamController _streamController = StreamController.broadcast();
-
   String _tex = 'drag&drop';
   final String _dataSet = '背面のデータ';
+  var flg = true;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -42,13 +42,19 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       body: Center(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             Draggable(
               data: _dataSet,
               feedback: Material(
                 child: Text(_dataSet),
               ),
+              onDragStarted: () {
+                setState(() {
+                  flg = false;
+                });
+                _streamController.sink.add(0);
+              },
               childWhenDragging: Text(_dataSet),
               child: Text(_dataSet),
             ),
@@ -60,38 +66,45 @@ class _MyHomePageState extends State<MyHomePage> {
                 }
                 _slideUpController.show(
                   context,
-                  Container(
-                      height: MediaQuery.of(context).size.height / 2,
+                  StreamBuilder(
+                    stream: _streamController.stream,
+                    builder: (BuildContext context, AsyncSnapshot snapshot) {
+                      return IgnorePointer(
+                        ignoring: flg,
+                        child: Container(
+                          height: MediaQuery.of(context).size.height / 2,
 
-                      // set size
-                      color: Colors.blue,
+                          // set size
+                          color: Colors.cyan.withOpacity(0.5),
 
-                      // set color
-                      child: Container(
-                          alignment: Alignment.center,
-                          child: StreamBuilder(
-                            stream: _streamController.stream,
-                            builder:
-                                (BuildContext context, AsyncSnapshot snapshot) {
-                              return Material(
-                                child: DragTarget(
-                                  onAccept: (data) {
-                                    setState(() {
-                                      _tex = data.toString();
-                                    });
-                                  },
-                                  builder: (BuildContext context,
-                                      List<Object?> candidateData,
-                                      List<dynamic> rejectedData) {
-                                    return Text(
-                                      _tex,
-                                      style: const TextStyle(fontSize: 24),
-                                    );
-                                  },
-                                ),
-                              );
-                            },
-                          ))),
+                          // set color
+                          child: Container(
+                            alignment: Alignment.center,
+                            child: Material(
+                              child: DragTarget(
+                                onAccept: (data) {
+                                  setState(() {
+                                    flg = true;
+                                    _tex = data.toString();
+                                  });
+                                   _streamController.sink.add(0);
+                                },
+                                builder: (BuildContext context,
+                                    List<Object?> candidateData,
+                                    List<dynamic> rejectedData) {
+                                  return Text(
+                                    _tex,
+                                    style: const TextStyle(fontSize: 24),
+                                  );
+                                },
+                              ),
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+
                   200, // set speed
                 );
               },
