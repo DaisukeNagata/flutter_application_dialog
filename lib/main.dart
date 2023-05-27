@@ -30,7 +30,7 @@ class _MyHomePageState extends State<MyHomePage> {
   final SlideUpController _slideUpController = SlideUpController();
   Stream<int> numberStream() async* {
     int number = 1;
-    while (true) {
+    while (number == 1) {
       await Future.delayed(const Duration(seconds: 1));
       yield number++;
     }
