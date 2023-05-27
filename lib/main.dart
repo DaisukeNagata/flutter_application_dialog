@@ -33,17 +33,14 @@ class _MyHomePageState extends State<MyHomePage> {
   final _buttonHeight = 60.0;
 
   @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPersistentFrameCallback((_) {
-      y = MediaQuery.of(context).size.height;
-      bottom = MediaQuery.of(context).viewInsets.bottom;
-    });
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    bottom = MediaQuery.of(context).viewInsets.bottom;
   }
 
   Stream<double> numberStream() async* {
-    while (true) {
-      await Future.delayed(const Duration(milliseconds: 1));
+    while (y == 0.0) {
+      await Future.delayed(const Duration(milliseconds: 400));
       yield y = bottom + _buttonHeight;
     }
   }
@@ -74,8 +71,9 @@ class _MyHomePageState extends State<MyHomePage> {
                           children: [
                             GestureDetector(
                               onTap: () {
+                                y = 0;
                                 _slideUpController.show(
-                                    context, const SizedBox(), 200);
+                                    context, const SizedBox(), 1000);
                                 FocusScope.of(context).unfocus();
                               },
                               child: Container(
