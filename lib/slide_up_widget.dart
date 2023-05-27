@@ -4,7 +4,6 @@ class SlideUpController {
   late OverlayEntry _overlayEntry;
   late AnimationController _animationController;
   bool _isOpen = true;
-
   Future<void> show(BuildContext context, Widget child, int speed) async {
     if (_isOpen == false) {
       _hide(context, speed);

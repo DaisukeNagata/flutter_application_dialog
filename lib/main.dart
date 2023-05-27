@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_application_dialog/slide_up_widget.dart';
 
@@ -28,13 +30,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   final SlideUpController _slideUpController = SlideUpController();
-  Stream<int> numberStream() async* {
-    int number = 1;
-    while (number == 1) {
-      await Future.delayed(const Duration(seconds: 1));
-      yield number++;
-    }
-  }
+  StreamController _streamController = StreamController.broadcast();
 
   String _tex = 'drag&drop';
   final String _dataSet = '背面のデータ';
@@ -58,6 +54,10 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             ElevatedButton(
               onPressed: () async {
+                if (_streamController.hasListener) {
+                  _streamController.close();
+                  _streamController = StreamController.broadcast();
+                }
                 _slideUpController.show(
                   context,
                   Container(
@@ -70,7 +70,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       child: Container(
                           alignment: Alignment.center,
                           child: StreamBuilder(
-                            stream: numberStream(),
+                            stream: _streamController.stream,
                             builder:
                                 (BuildContext context, AsyncSnapshot snapshot) {
                               return Material(
@@ -102,6 +102,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 setState(() {
                   _tex = 'drag&drop';
                 });
+                _streamController.sink.add(0);
               },
               child: const Text('Clear Data'),
             ),
