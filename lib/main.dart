@@ -50,9 +50,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 child: Text(_dataSet),
               ),
               onDragStarted: () {
-                setState(() {
-                  flg = false;
-                });
+                flg = false;
                 _streamController.sink.add(0);
               },
               childWhenDragging: Text(_dataSet),
@@ -83,11 +81,9 @@ class _MyHomePageState extends State<MyHomePage> {
                             child: Material(
                               child: DragTarget(
                                 onAccept: (data) {
-                                  setState(() {
-                                    flg = true;
-                                    _tex = data.toString();
-                                  });
-                                   _streamController.sink.add(0);
+                                  flg = true;
+                                  _tex = data.toString();
+                                  _streamController.sink.add(0);
                                 },
                                 builder: (BuildContext context,
                                     List<Object?> candidateData,
